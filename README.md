@@ -57,6 +57,10 @@ Open a browser and navigate to http://localhost:3100 (if on external machine, re
 
 If you install [Tailscale](https://tailscale.com) on both devices (e.g. your Mac Mini running this repo and your phone), you can use the Tailscale IP of your Mac Mini to connect; so you don't need any VPS set up.
 
+## Limitations
+
+1 stream active at any time. Other streams will be stopped if new ones start. You can watch that same stream from multiple devices at the same time.
+
 ## License and attribution
 
 Unless otherwise specified (e.g. on top of the file), this repo is licensed under the Apache 2.0 license.
