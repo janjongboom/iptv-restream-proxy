@@ -1,0 +1,4 @@
+node_modules/
+.hls/
+.iptv-proxy-settings.json
+*.m3u

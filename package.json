@@ -1,0 +1,22 @@
+{
+  "name": "iptv-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --import tsx server/index.ts",
+    "dev": "node --watch --import tsx server/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint server client --max-warnings=0",
+    "lint:fix": "eslint server client --fix"
+  },
+  "devDependencies": {
+    "@types/node": "24.0.0",
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^16.0.0",
+    "tsx": "4.19.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.0.0"
+  }
+}

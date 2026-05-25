@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IPTV Proxy</title>
+    <style>
+      :root {
+        --bg: #edf2f6;
+        --panel: rgba(255, 255, 255, 0.86);
+        --panel-strong: #ffffff;
+        --text: #11202e;
+        --muted: #597184;
+        --line: rgba(17, 32, 46, 0.12);
+        --accent: #0f9d7a;
+        --accent-soft: rgba(15, 157, 122, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(15, 157, 122, 0.12), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(255, 180, 0, 0.14), transparent 26%),
+          linear-gradient(180deg, #f7fafc, var(--bg));
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+      }
+
+      .shell {
+        width: min(1180px, calc(100vw - 32px));
+        margin: 24px auto;
+        display: grid;
+        grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+        gap: 20px;
+      }
+
+      .shell-single {
+        width: min(1180px, calc(100vw - 32px));
+        margin: 24px auto;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--panel);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 24px 64px rgba(34, 55, 74, 0.12);
+      }
+
+      .catalog {
+        padding: 22px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 3.25rem);
+        letter-spacing: -0.04em;
+      }
+
+      .subhead {
+        margin: 8px 0 18px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      input[type="search"] {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel-strong);
+        color: var(--text);
+        font: inherit;
+      }
+
+      input[readonly] {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel-strong);
+        color: var(--text);
+        font: 0.95rem/1.2 inherit;
+      }
+
+      .toolbar {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 180px;
+        gap: 12px;
+        align-items: end;
+      }
+
+      .playlist-card {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--panel-strong);
+      }
+
+      .playlist-layout {
+        display: grid;
+        grid-template-columns: 180px minmax(0, 1fr);
+        gap: 8px 14px;
+        align-items: center;
+      }
+
+      .playlist-label {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .playlist-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+      }
+
+      .copy-button {
+        padding: 11px 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: linear-gradient(180deg, #ffffff, #eef7f3);
+        color: var(--text);
+        font: 0.95rem/1.2 inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .copy-button:hover {
+        border-color: rgba(15, 157, 122, 0.35);
+      }
+
+      .copy-button:active {
+        transform: translateY(1px);
+      }
+
+      .field label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      select {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel-strong);
+        color: var(--text);
+        font: inherit;
+      }
+
+      .hint, .status {
+        margin: 12px 2px 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .status {
+        color: var(--accent);
+      }
+
+      .playlist-status {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .results {
+        margin-top: 16px;
+        display: grid;
+        gap: 10px;
+        max-height: calc(100vh - 270px);
+        overflow: auto;
+        padding-right: 4px;
+      }
+
+      .result {
+        display: grid;
+        grid-template-columns: 56px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--panel-strong);
+        cursor: pointer;
+        text-align: left;
+        transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+      }
+
+      .result:hover {
+        border-color: rgba(15, 157, 122, 0.35);
+        box-shadow: 0 10px 28px rgba(34, 55, 74, 0.1);
+      }
+
+      .result.is-active {
+        border-color: rgba(15, 157, 122, 0.5);
+        box-shadow: inset 0 0 0 1px rgba(15, 157, 122, 0.12);
+        background: linear-gradient(180deg, #ffffff, #f6fffb);
+      }
+
+      .result.is-active:hover {
+        border-color: rgba(15, 157, 122, 0.5);
+        box-shadow:
+          inset 0 0 0 1px rgba(15, 157, 122, 0.12),
+          0 10px 28px rgba(34, 55, 74, 0.1);
+      }
+
+      .logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #d7e5ef, #eef4f8);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .name {
+        font-weight: 700;
+      }
+
+      .meta {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .player {
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        min-height: 70vh;
+      }
+
+      .now-playing {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: var(--accent-soft);
+        color: var(--text);
+      }
+
+      .stream-debug {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border: 1px solid rgba(17, 32, 46, 0.12);
+        border-radius: 18px;
+        background: #fff8ef;
+        color: #66471f;
+      }
+
+      .stream-debug[hidden] {
+        display: none;
+      }
+
+      .stream-debug-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .stream-debug-text {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font: 0.9rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .video-shell {
+        margin-top: 16px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #000;
+      }
+
+      video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        display: block;
+        background: #000;
+      }
+
+      @media (max-width: 900px) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .results {
+          max-height: none;
+        }
+
+        .toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .playlist-layout {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="playlist-card shell-single">
+      <div class="playlist-layout">
+        <label for="playlist-url" class="playlist-label">Playlist URL<br>
+          <span style="font-weight: 300">Paste into your IPTV app</span>
+        </label>
+        <div class="playlist-row">
+          <input id="playlist-url" type="text" readonly style="background: #eee">
+          <button id="copy-playlist" class="copy-button" type="button">Copy</button>
+        </div>
+      </div>
+      <div id="playlist-status" class="playlist-status"></div>
+    </div>
+
+    <div class="shell">
+      <section class="panel catalog">
+        <h1>IPTV Restream Proxy</h1>
+        <p class="subhead">Search the live channels in your M3U catalog. Selecting a channel switches the single active provider stream over to that channel.</p>
+        <div class="toolbar">
+          <div class="field">
+            <label for="search">Search</label>
+            <input id="search" type="search" placeholder="Search channels, groups, ESPN, Ziggo, F1..." autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="quality">Bandwidth</label>
+            <select id="quality">__QUALITY_OPTIONS__</select>
+          </div>
+        </div>
+        <div class="hint">Type at least __SEARCH_MIN_LENGTH__ characters. Results are capped at __SEARCH_LIMIT__ live channels.</div>
+        <div id="search-status" class="status">No stream selected yet.</div>
+        <div id="results" class="results"></div>
+      </section>
+      <section class="panel player">
+        <div id="now-playing" class="now-playing">Choose a channel from the search results to start playback.</div>
+        <div class="video-shell">
+          <video id="player" controls autoplay muted playsinline></video>
+        </div>
+        <div id="stream-debug" class="stream-debug" hidden>
+          <div class="stream-debug-title">Stream status</div>
+          <pre id="stream-debug-text" class="stream-debug-text"></pre>
+        </div>
+      </section>
+    </div>
+    <script src="/assets/hls.min.js"></script>
+    <script id="app-config" type="application/json">__APP_CONFIG__</script>
+    <script type="module" src="/client/index-ui.js"></script>
+  </body>
+</html>
